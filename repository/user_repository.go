@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"user-app/errors"
-	"user-app/model"
+	"github.com/Ateto/User-Login-Service/errors"
+	"github.com/Ateto/User-Login-Service/model"
 )
 
 type UserRepository struct {

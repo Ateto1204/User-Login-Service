@@ -25,3 +25,11 @@ type PwdIncorrectError struct {
 func (e *PwdIncorrectError) Error() string {
 	return fmt.Sprintf("Password for user %s is incorrect", e.Email)
 }
+
+type EmailInvalidError struct {
+	Email string
+}
+
+func (e *EmailInvalidError) Error() string {
+	return fmt.Sprintf("Email format with %s is invalid", e.Email)
+}

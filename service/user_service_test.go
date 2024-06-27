@@ -2,17 +2,29 @@ package service_test
 
 import (
 	"testing"
-	"user-app/errors"
-	"user-app/repository"
-	"user-app/service"
+
+	"github.com/Ateto/User-Login-Service/errors"
+	"github.com/Ateto/User-Login-Service/repository"
+	"github.com/Ateto/User-Login-Service/service"
 )
 
 func TestUserService(t *testing.T) {
 	repo := repository.NewUserRepository()
 	service := service.NewUserService(repo)
 
+	// Test invalid email format
+	err := service.CreateUser("invalid", "invalid", "invalid")
+	if _, ok := err.(*errors.EmailInvalidError); !ok {
+		t.Errorf("Expected EmailInvalidError, got %v", err)
+	}
+
+	_, err = service.GetUserByEmail("invalid", "invalid")
+	if _, ok := err.(*errors.EmailInvalidError); !ok {
+		t.Errorf("Expected EmailInvalidError, got %v", err)
+	}
+
 	// Test user not found error
-	_, err := service.GetUserByEmail("nonexisted_user", "pwd")
+	_, err = service.GetUserByEmail("nonexisted@gmail.com", "nonexisted")
 	if _, ok := err.(*errors.UserNotFoundError); !ok {
 		t.Errorf("Expected UserNotFoundError, got %v", err)
 	}
