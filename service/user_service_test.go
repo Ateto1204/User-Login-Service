@@ -1,19 +1,25 @@
 package service_test
 
 import (
+	"log"
 	"testing"
 
+	"github.com/Ateto/User-Login-Service/db"
 	"github.com/Ateto/User-Login-Service/errors"
 	"github.com/Ateto/User-Login-Service/repository"
 	"github.com/Ateto/User-Login-Service/service"
 )
 
 func TestUserService(t *testing.T) {
-	repo := repository.NewUserRepository()
+	db, err := db.NewDB("../config.json", "../db/init.sql")
+	if err != nil {
+		log.Fatal(err)
+	}
+	repo := repository.NewUserRepository(db)
 	service := service.NewUserService(repo)
 
 	// Test invalid email format
-	err := service.CreateUser("invalid", "invalid", "invalid")
+	err = service.CreateUser("invalid", "invalid", "invalid")
 	if _, ok := err.(*errors.EmailInvalidError); !ok {
 		t.Errorf("Expected EmailInvalidError, got %v", err)
 	}

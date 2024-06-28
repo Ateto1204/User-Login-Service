@@ -1,0 +1,15 @@
+# Compile Output
+/bin/
+/obj/
+
+# Dependency Package
+/vendor/
+
+# Execution File
+User-Login-Service
+
+# Log File
+*.log
+
+# System File
+.DS_Store

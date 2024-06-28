@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/Ateto/User-Login-Service/api"
 	"github.com/Ateto/User-Login-Service/db"
 	"github.com/Ateto/User-Login-Service/repository"
@@ -10,11 +12,14 @@ import (
 )
 
 func main() {
-	repo := repository.NewUserRepository()
+	db, err := db.NewDB("./config.json", "./db/init.sql")
+	if err != nil {
+		log.Fatal(err)
+	}
+	repo := repository.NewUserRepository(db)
 	service := service.NewUserService(repo)
 	controller := api.NewUserController(service)
 
-	db.InitialDB()
 	router := SetUpRouter(controller)
 
 	router.Run(":8080")

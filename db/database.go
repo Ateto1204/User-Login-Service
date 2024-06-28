@@ -11,8 +11,12 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func InitialDB() {
-	config.SetupEnv("./config.json")
+type MysqlDatabase struct {
+	DB *sql.DB
+}
+
+func NewDB(configLocation, sqlLocation string) (*MysqlDatabase, error) {
+	config.SetupEnv(configLocation)
 	dsn := fmt.Sprintf(
 		"%s:%s@tcp(%s)/%s",
 		config.AppConfig.Database.User,
@@ -23,19 +27,22 @@ func InitialDB() {
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
+		// log.Fatal(err)
 	}
-	defer db.Close()
+	// defer db.Close()
 
 	err = db.Ping()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
+		// log.Fatal(err)
 	}
 	fmt.Println("Connected to MySQL!")
 
-	createTableQuery, err := os.ReadFile("./db/init.sql")
+	createTableQuery, err := os.ReadFile(sqlLocation)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
+		// log.Fatal(err)
 	}
 
 	_, err = db.Exec(string(createTableQuery))
@@ -43,4 +50,5 @@ func InitialDB() {
 		log.Fatal(err)
 	}
 	fmt.Println("Table created successfully!")
+	return &MysqlDatabase{DB: db}, nil
 }

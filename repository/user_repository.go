@@ -1,34 +1,73 @@
 package repository
 
 import (
+	"database/sql"
+	"log"
+
+	"github.com/Ateto/User-Login-Service/db"
 	"github.com/Ateto/User-Login-Service/errors"
 	"github.com/Ateto/User-Login-Service/model"
 )
 
 type UserRepository struct {
-	users map[string]*model.User
+	db *db.MysqlDatabase
 }
 
-func NewUserRepository() *UserRepository {
-	return &UserRepository{users: make(map[string]*model.User)}
+func NewUserRepository(db *db.MysqlDatabase) *UserRepository {
+	return &UserRepository{
+		db: db,
+	}
 }
 
 func (repo *UserRepository) GetUserByEmail(email, pwd string) (*model.User, error) {
-	user := repo.users[email]
-	if user == nil {
-		return nil, &errors.UserNotFoundError{Email: email}
+	err := isUserExisted(repo.db.DB, email)
+	if _, ok := err.(*errors.UserNotFoundError); ok {
+		return nil, err
 	}
+
+	query := `SELECT email, name, pwd FROM user WHERE email = ?`
+	row := repo.db.DB.QueryRow(query, email)
+
+	var user model.User
+	err = row.Scan(&user.Email, &user.Name, &user.Pwd)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, &errors.UserNotFoundError{Email: email}
+		}
+		return nil, err
+	}
+
 	if pwd != user.Pwd {
 		return nil, &errors.PwdIncorrectError{Email: email}
 	}
-	return user, nil
+	return &user, nil
 }
 
 func (repo *UserRepository) CreateUser(user *model.User) error {
 	email := user.Email
-	if repo.users[email] != nil {
-		return &errors.UserExistedError{Email: email}
+	err := isUserExisted(repo.db.DB, email)
+	if _, ok := err.(*errors.UserExistedError); ok {
+		return err
 	}
-	repo.users[email] = user
+	query := `INSERT INTO user (email, name, pwd) VALUES (?, ?, ?)`
+	_, err = repo.db.DB.Exec(query, user.Email, user.Name, user.Pwd)
+	if err != nil {
+		return err
+	}
 	return nil
+}
+
+func isUserExisted(db *sql.DB, email string) error {
+	query := `SELECT email FROM user WHERE email = ?`
+	row := db.QueryRow(query, email)
+
+	var existingEmail string
+	err := row.Scan(&existingEmail)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return &errors.UserNotFoundError{Email: email}
+		}
+		log.Fatal(err)
+	}
+	return &errors.UserExistedError{Email: email}
 }
