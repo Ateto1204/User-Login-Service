@@ -15,7 +15,7 @@ jobs:
         mysql:
           image: mysql:8
           env:
-              MYSQL_DATABASE: user_sql
+              MYSQL_DATABASE: sql_user
               MYSQL_ROOT_PASSWORD: Sakura1204
           ports:
             - 3306:3306
@@ -40,8 +40,10 @@ jobs:
         done
 
     - name: Create database
+      env:
+        MYSQL_PWD: Sakura1204
       run: |
-        mysql -h 127.0.0.1 -uroot -pSakura1204 -e "CREATE DATABASE IF NOT EXISTS user_sql;"
+        mysql -h 127.0.0.1 -uroot -e "CREATE DATABASE IF NOT EXISTS user_sql;"
 
     - name: Build
       run: go build .
