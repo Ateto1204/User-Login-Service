@@ -39,6 +39,10 @@ jobs:
           sleep 2
         done
 
+    - name: Create database
+      run: |
+        mysql -h 127.0.0.1 -uroot -pSakura1204 -e "CREATE DATABASE IF NOT EXISTS user_sql;"
+
     - name: Build
       run: go build .
 
