@@ -16,9 +16,6 @@ jobs:
           image: mysql:8
           env:
               MYSQL_DATABASE: user_sql
-              MYSQL_HOST: 127.0.0.1
-              MYSQL_USER: root
-              MYSQL_PASSWORD: Sakura1204
               MYSQL_ROOT_PASSWORD: Sakura1204
           ports:
             - 3306:3306
